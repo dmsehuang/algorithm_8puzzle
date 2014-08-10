@@ -1,78 +1,70 @@
-import java.util.HashSet;
-
-public class Solver {
-    int minMoves = 0;
-    Node dest = null;
-    MinPQ<Node> pq = new MinPQ<Node>();
-    MinPQ<Node> pqTwin = new MinPQ<Node>();
-    HashSet<Board> visited = new HashSet<Board>();
-    HashSet<Board> visitedTwin = new HashSet<Board>();
-    Board initial;
+public class Solver { 
+    private Node goal = null; // if can not find a solution, goal is null
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
-        this.initial = initial;
+        boolean found = false; // found solution for board or twin board
+        MinPQ<Node> pq = new MinPQ<Node>();
+        MinPQ<Node> twinPQ = new MinPQ<Node>();
+        
+        // start A star search simultaneously for two priority queues
+        Node root = new Node(initial);
+        Node twinRoot = new Node(initial.twin());
+        
+        pq.insert(root);
+        twinPQ.insert(twinRoot);
+        
+        while (!found) {
+            Node curr = pq.delMin();
+            Node twinCurr = twinPQ.delMin();
+            
+            // find a solution 
+            if (curr.board.isGoal() || twinCurr.board.isGoal()) {
+                if (curr.board.isGoal()) goal = curr; // goal is not null
+                found = true;
+                break;
+            }
+            
+            // if not, get the neighbors, put them in the priority queue
+            for (Board board : curr.board.neighbors()) {
+                if (curr.prev != null && board.equals(curr.prev.board)) {
+                    continue; // skip the same node
+                }else {
+                    Node node = new Node(board);
+                    node.moves = curr.moves + 1;
+                    node.prev = curr;
+                    pq.insert(node);
+                }
+            }
+            // same for twin priority queue
+            for (Board board : twinCurr.board.neighbors()) {
+                if (twinCurr.prev != null && board.equals(twinCurr.prev.board)) {
+                    continue; // skip the same node
+                }else {
+                    Node node = new Node(board);
+                    node.moves = twinCurr.moves + 1;
+                    node.prev = twinCurr;
+                    twinPQ.insert(node);
+                }
+            }
+        }
     }
     
     // is the initial board solvable?
     public boolean isSolvable() {
-        // twin 
-        Node rootTwin = new Node(initial.twin());
-        pqTwin.insert(rootTwin);
-        visited.add(initial.twin());
-        
-        while (pqTwin.size() > 0) {
-            Node curr = pq.delMin();
-            
-            // if find the solution
-            if (curr.board.isGoal()) {
-                return true;
-            }
-            // if not, get the neighbors and enqueue
-            for (Board board : curr.board.neighbors()) {
-                if (visited.contains(board)) continue; // can not be father's node
-                Node node = new Node(board);
-                visited.add(board);
-                pq.insert(node);
-            }
-        }
-        return false;
+        return goal != null;
     }
     
     // min number of moves to solve initial board; -1 if no solution
     public int moves() {
-        return minMoves;
+        return goal.moves;
     }
     
     // sequence of boards in a shortest solution; null if no solution
     public Iterable<Board> solution() {
-        Node root = new Node(initial);
-        pq.insert(root);
-        visited.add(initial);
-        
-        while (pq.size() > 0) {
-            Node curr = pq.delMin();
-            
-            // if find the solution
-            if (curr.board.isGoal()) {
-                minMoves = curr.moves;
-                dest = curr;
-                break;
-            }
-            // if not, get the neighbors and enqueue
-            for (Board board : curr.board.neighbors()) {
-                if (visited.contains(board)) continue; // can not be father's node
-                Node node = new Node(board);
-                node.moves = curr.moves + 1;
-                node.prev = curr;
-                visited.add(board);
-                pq.insert(node);
-            }
-        }
-        
-        // reconstruct the solution
         Stack<Board> stk = new Stack<Board>();
-        Node curr = dest;
+        // reconstruct the solution
+        Node curr = goal;
         while (curr.prev != null) {
             stk.push(curr.board);
             curr = curr.prev;
