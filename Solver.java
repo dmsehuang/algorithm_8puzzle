@@ -29,7 +29,7 @@ public class Solver {
             for (Board board : curr.board.neighbors()) {
                 if (curr.prev != null && board.equals(curr.prev.board)) {
                     continue; // skip the same node
-                }else {
+                } else {
                     Node node = new Node(board);
                     node.moves = curr.moves + 1;
                     node.prev = curr;
@@ -40,7 +40,7 @@ public class Solver {
             for (Board board : twinCurr.board.neighbors()) {
                 if (twinCurr.prev != null && board.equals(twinCurr.prev.board)) {
                     continue; // skip the same node
-                }else {
+                } else {
                     Node node = new Node(board);
                     node.moves = twinCurr.moves + 1;
                     node.prev = twinCurr;
@@ -57,11 +57,13 @@ public class Solver {
     
     // min number of moves to solve initial board; -1 if no solution
     public int moves() {
+        if (goal == null) return -1;
         return goal.moves;
     }
     
     // sequence of boards in a shortest solution; null if no solution
     public Iterable<Board> solution() {
+        if (goal == null) return null;
         Stack<Board> stk = new Stack<Board>();
         // reconstruct the solution
         Node curr = goal;
@@ -74,7 +76,7 @@ public class Solver {
     }
     
     //solve a slider puzzle (given below)
-    public static void main (String[]args) {
+    public static void main(String[]args) {
         // create initial board from file
         In in  = new In(args[0]); 
         int N = in.readInt();
@@ -92,7 +94,7 @@ public class Solver {
         // print solution to standard ouput
         if (!solver.isSolvable()) {
             StdOut.println("No solution possible");
-        }else {
+        } else {
             StdOut.println("Minimum number of moves = " + solver.moves());
             for (Board board : solver.solution()) {
                 StdOut.println(board);
@@ -101,7 +103,7 @@ public class Solver {
     }
 }
 
-class Node implements Comparable<Node>{
+class Node implements Comparable<Node> {
     public Board board; // point to the current board
     public int moves; // N moves to the current search node
     public Node prev; // point to the previous search node

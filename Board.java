@@ -37,8 +37,8 @@ public class Board {
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 if (grid[i][j] == 0) continue;
-                int m = grid[i][j] % N == 0 ? (grid[i][j] / N - 1) : (grid[i][j] / N);
-                int n = grid[i][j] % N == 0 ? (N - 1) : (grid[i][j] % N - 1);
+                int m = (grid[i][j] % N == 0) ? (grid[i][j] / N - 1) : (grid[i][j] / N);
+                int n = (grid[i][j] % N == 0) ? (N - 1) : (grid[i][j] % N - 1);
                 count += Math.abs(m - i) + Math.abs(n - j);
             }
         }
@@ -96,7 +96,6 @@ public class Board {
     // all neighboring boards
     public Iterable<Board> neighbors() {
         Stack<Board> stack = new Stack<Board>();
-        int N = dimension();
         // mark the blank position
         boolean found = false;
         int i = -1;
@@ -105,7 +104,8 @@ public class Board {
             for (int n = 0; !found && n < N; n++) {
                 if (grid[m][n] == 0) {
                     found = true;
-                    i = m; j = n;
+                    i = m; 
+                    j = n;
                     break;
                 }
             }
@@ -151,7 +151,6 @@ public class Board {
     
     // string representation of the board (in the output format specified below)
     public String toString() {
-        int N = dimension();
         StringBuilder s = new StringBuilder();
         s.append(N + "\n");
         for (int i = 0; i < N; i++) {
